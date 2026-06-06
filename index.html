@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0a0f1e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Third Line">
+<link rel="manifest" href="manifest.json">
+<title>Third Line — Sales Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070d1a;
+    --bg2: #0d1526;
+    --bg3: #111d35;
+    --teal: #00d4b8;
+    --teal2: #00a896;
+    --red: #ff4757;
+    --gold: #ffd32a;
+    --blue: #3498db;
+    --green: #2ecc71;
+    --text: #e8f0fe;
+    --text2: #8899bb;
+    --border: rgba(0,212,184,0.15);
+    --card: rgba(13,21,38,0.9);
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { height:100%; font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); overflow:hidden; }
+
+  /* ── SPLASH ── */
+  #splash {
+    position:fixed; inset:0; background:var(--bg);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    z-index:1000; transition:opacity .5s;
+  }
+  .splash-logo { font-size:3rem; font-weight:900; color:var(--teal); letter-spacing:2px; }
+  .splash-sub { color:var(--text2); margin-top:.5rem; font-size:.9rem; }
+  .splash-bar { width:200px; height:3px; background:var(--bg3); border-radius:2px; margin-top:2rem; overflow:hidden; }
+  .splash-fill { height:100%; background:var(--teal); border-radius:2px; animation:fill 1.8s ease forwards; }
+  @keyframes fill { from{width:0} to{width:100%} }
+
+  /* ── LOGIN ── */
+  #login {
+    position:fixed; inset:0; background:var(--bg);
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    padding:2rem; z-index:900;
+  }
+  .login-logo { font-size:2.5rem; font-weight:900; color:var(--teal); margin-bottom:.5rem; }
+  .login-tagline { color:var(--text2); font-size:.85rem; margin-bottom:2.5rem; }
+  .login-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:16px; padding:2rem; width:100%; max-width:360px;
+    box-shadow:var(--shadow);
+  }
+  .login-title { font-size:1.1rem; font-weight:700; margin-bottom:1.5rem; color:var(--teal); }
+  .field { margin-bottom:1.2rem; }
+  .field label { font-size:.8rem; color:var(--text2); display:block; margin-bottom:.4rem; }
+  .field input, .field select {
+    width:100%; background:var(--bg3); border:1px solid var(--border);
+    border-radius:10px; padding:.75rem 1rem; color:var(--text);
+    font-family:'Cairo',sans-serif; font-size:.95rem; outline:none;
+    transition:border .2s;
+  }
+  .field input:focus, .field select:focus { border-color:var(--teal); }
+  .btn-primary {
+    width:100%; background:var(--teal); color:#000; font-weight:700;
+    font-family:'Cairo',sans-serif; font-size:1rem; border:none;
+    border-radius:10px; padding:.85rem; cursor:pointer;
+    transition:all .2s; margin-top:.5rem;
+  }
+  .btn-primary:hover { background:var(--teal2); transform:translateY(-1px); }
+  .login-err { color:var(--red); font-size:.8rem; text-align:center; margin-top:.8rem; display:none; }
+
+  /* ── MAIN APP ── */
+  #app { display:none; flex-direction:column; height:100%; }
+
+  /* Header */
+  .header {
+    background:var(--bg2); border-bottom:1px solid var(--border);
+    padding:.75rem 1rem; display:flex; align-items:center; justify-content:space-between;
+    flex-shrink:0; position:relative;
+  }
+  .header-logo { font-size:1.1rem; font-weight:900; color:var(--teal); }
+  .header-user { font-size:.75rem; color:var(--text2); text-align:left; }
+  .header-user span { color:var(--teal); font-weight:700; }
+  .logout-btn {
+    background:rgba(255,71,87,.15); border:1px solid rgba(255,71,87,.3);
+    color:var(--red); border-radius:8px; padding:.4rem .8rem;
+    font-size:.75rem; cursor:pointer; font-family:'Cairo',sans-serif;
+  }
+
+  /* Nav Tabs */
+  .nav-tabs {
+    background:var(--bg2); border-bottom:1px solid var(--border);
+    display:flex; overflow-x:auto; flex-shrink:0;
+    scrollbar-width:none;
+  }
+  .nav-tabs::-webkit-scrollbar { display:none; }
+  .nav-tab {
+    flex-shrink:0; padding:.7rem 1.2rem; font-size:.82rem; font-weight:600;
+    color:var(--text2); cursor:pointer; border-bottom:2px solid transparent;
+    transition:all .2s; white-space:nowrap; font-family:'Cairo',sans-serif;
+  }
+  .nav-tab.active { color:var(--teal); border-bottom-color:var(--teal); }
+
+  /* Content */
+  .content { flex:1; overflow-y:auto; padding:1rem; }
+  .page { display:none; }
+  .page.active { display:block; }
+
+  /* ── DASHBOARD ── */
+  .dash-greeting { font-size:1.1rem; font-weight:700; margin-bottom:.3rem; }
+  .dash-date { font-size:.8rem; color:var(--text2); margin-bottom:1.2rem; }
+
+  .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-bottom:1.2rem; }
+  .stat-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:14px; padding:1rem; position:relative; overflow:hidden;
+  }
+  .stat-card::before {
+    content:''; position:absolute; top:0; right:0;
+    width:60px; height:60px; border-radius:50%;
+    transform:translate(20px,-20px); opacity:.15;
+  }
+  .stat-card.teal::before { background:var(--teal); }
+  .stat-card.red::before { background:var(--red); }
+  .stat-card.gold::before { background:var(--gold); }
+  .stat-card.blue::before { background:var(--blue); }
+  .stat-icon { font-size:1.4rem; margin-bottom:.4rem; }
+  .stat-val { font-size:1.8rem; font-weight:900; line-height:1; }
+  .stat-val.teal { color:var(--teal); }
+  .stat-val.red { color:var(--red); }
+  .stat-val.gold { color:var(--gold); }
+  .stat-val.blue { color:var(--blue); }
+  .stat-lbl { font-size:.72rem; color:var(--text2); margin-top:.3rem; }
+
+  .section-title {
+    font-size:.85rem; font-weight:700; color:var(--text2);
+    text-transform:uppercase; letter-spacing:1px; margin-bottom:.75rem;
+    display:flex; align-items:center; gap:.5rem;
+  }
+  .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* Visit Cards */
+  .visit-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:12px; padding:.9rem 1rem; margin-bottom:.75rem;
+    position:relative; overflow:hidden;
+  }
+  .visit-card::before {
+    content:''; position:absolute; right:0; top:0; bottom:0;
+    width:3px;
+  }
+  .visit-card.status-hold::before { background:var(--gold); }
+  .visit-card.status-account::before { background:var(--teal); }
+  .visit-card.status-lead::before { background:var(--blue); }
+  .visit-card.status-done::before { background:var(--green); }
+
+  .vc-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:.5rem; }
+  .vc-store { font-weight:700; font-size:.95rem; }
+  .vc-id { font-size:.7rem; color:var(--text2); background:var(--bg3); padding:.2rem .5rem; border-radius:5px; }
+  .vc-area { font-size:.75rem; color:var(--teal); margin-bottom:.3rem; }
+  .vc-bottom { display:flex; justify-content:space-between; align-items:center; }
+  .vc-phone { font-size:.78rem; color:var(--text2); direction:ltr; }
+  .status-badge {
+    font-size:.68rem; font-weight:700; padding:.2rem .6rem;
+    border-radius:20px; text-transform:uppercase;
+  }
+  .badge-hold { background:rgba(255,211,42,.15); color:var(--gold); border:1px solid rgba(255,211,42,.3); }
+  .badge-account { background:rgba(0,212,184,.15); color:var(--teal); border:1px solid rgba(0,212,184,.3); }
+  .badge-lead { background:rgba(52,152,219,.15); color:var(--blue); border:1px solid rgba(52,152,219,.3); }
+  .badge-done { background:rgba(46,204,113,.15); color:var(--green); border:1px solid rgba(46,204,113,.3); }
+
+  /* ── TABLE VIEW ── */
+  .table-toolbar {
+    display:flex; gap:.6rem; margin-bottom:1rem; flex-wrap:wrap;
+  }
+  .search-box {
+    flex:1; min-width:150px; background:var(--bg2); border:1px solid var(--border);
+    border-radius:10px; padding:.6rem 1rem; color:var(--text);
+    font-family:'Cairo',sans-serif; font-size:.85rem; outline:none;
+  }
+  .filter-select {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:10px; padding:.6rem .8rem; color:var(--text);
+    font-family:'Cairo',sans-serif; font-size:.8rem; outline:none; cursor:pointer;
+  }
+  .table-wrap { overflow-x:auto; border-radius:12px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:.78rem; min-width:600px; }
+  th {
+    background:var(--teal); color:#000; font-weight:700;
+    padding:.6rem .8rem; text-align:right; white-space:nowrap;
+  }
+  td { padding:.6rem .8rem; border-bottom:1px solid var(--border); vertical-align:middle; }
+  tr:hover td { background:rgba(0,212,184,.05); }
+  tr:last-child td { border-bottom:none; }
+  .td-store { font-weight:600; }
+  .td-note { max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text2); font-size:.72rem; }
+
+  /* ── ADD VISIT FORM ── */
+  .form-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:16px; padding:1.2rem;
+  }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; }
+  .form-field { margin-bottom:.9rem; }
+  .form-field label { font-size:.78rem; color:var(--text2); display:block; margin-bottom:.35rem; }
+  .form-field input, .form-field select, .form-field textarea {
+    width:100%; background:var(--bg3); border:1px solid var(--border);
+    border-radius:10px; padding:.65rem .9rem; color:var(--text);
+    font-family:'Cairo',sans-serif; font-size:.88rem; outline:none;
+    transition:border .2s;
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color:var(--teal); }
+  .form-field textarea { resize:vertical; min-height:80px; }
+  .btn-submit {
+    width:100%; background:var(--teal); color:#000; font-weight:700;
+    font-family:'Cairo',sans-serif; font-size:1rem; border:none;
+    border-radius:12px; padding:.9rem; cursor:pointer; transition:all .2s;
+    display:flex; align-items:center; justify-content:center; gap:.5rem;
+  }
+  .btn-submit:hover { background:var(--teal2); }
+  .form-success {
+    background:rgba(46,204,113,.15); border:1px solid rgba(46,204,113,.3);
+    border-radius:10px; padding:.8rem; text-align:center;
+    color:var(--green); font-size:.85rem; margin-top:.8rem; display:none;
+  }
+
+  /* ── REPORT ── */
+  .report-header {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:14px; padding:1rem; margin-bottom:1rem;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .report-year { font-size:1.2rem; font-weight:900; color:var(--teal); }
+  .rep-table-wrap { overflow-x:auto; border-radius:12px; border:1px solid var(--border); margin-bottom:1rem; }
+  .rep-table { width:100%; border-collapse:collapse; font-size:.78rem; min-width:500px; }
+  .rep-table th { background:var(--teal); color:#000; font-weight:700; padding:.6rem .8rem; text-align:center; }
+  .rep-table th.emp-head { background:var(--bg3); color:var(--teal); }
+  .rep-table td { padding:.6rem .8rem; border-bottom:1px solid var(--border); text-align:center; }
+  .rep-table td:first-child { text-align:right; font-weight:600; color:var(--text); }
+  .rep-table tr.total-row td { background:rgba(255,71,87,.1); color:var(--red); font-weight:700; }
+  .rep-table tr:hover td { background:rgba(0,212,184,.05); }
+  .emp-group-head { background:var(--bg3) !important; }
+
+  /* ── MAP ── */
+  .map-container {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:14px; overflow:hidden; margin-bottom:1rem;
+    height:280px; position:relative;
+  }
+  .map-placeholder {
+    width:100%; height:100%; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:.5rem;
+    background:linear-gradient(135deg, var(--bg2), var(--bg3));
+  }
+  .map-icon { font-size:3rem; opacity:.5; }
+  .map-text { color:var(--text2); font-size:.85rem; }
+  .team-list { display:flex; flex-direction:column; gap:.6rem; }
+  .team-item {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:12px; padding:.8rem 1rem;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .team-name { font-weight:700; font-size:.9rem; }
+  .team-visits { font-size:.75rem; color:var(--text2); }
+  .team-status {
+    font-size:.7rem; padding:.25rem .6rem; border-radius:20px;
+    font-weight:700;
+  }
+  .ts-active { background:rgba(46,204,113,.15); color:var(--green); border:1px solid rgba(46,204,113,.3); }
+  .ts-idle { background:rgba(136,153,187,.1); color:var(--text2); border:1px solid var(--border); }
+
+  /* ── ADMIN ── */
+  .admin-grid { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-bottom:1.2rem; }
+  .admin-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:14px; padding:1rem; cursor:pointer;
+    transition:all .2s; text-align:center;
+  }
+  .admin-card:hover { border-color:var(--teal); transform:translateY(-2px); }
+  .admin-card-icon { font-size:2rem; margin-bottom:.4rem; }
+  .admin-card-title { font-size:.82rem; font-weight:700; }
+  .admin-card-sub { font-size:.72rem; color:var(--text2); }
+
+  .pwd-list { display:flex; flex-direction:column; gap:.6rem; }
+  .pwd-item {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:12px; padding:.8rem 1rem;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .pwd-name { font-weight:700; font-size:.85rem; }
+  .pwd-role { font-size:.7rem; color:var(--text2); }
+  .pwd-code {
+    background:var(--bg3); border:1px solid var(--border);
+    border-radius:8px; padding:.3rem .8rem; font-family:'Rajdhani',sans-serif;
+    font-size:1rem; color:var(--teal); letter-spacing:2px;
+  }
+  .btn-sm {
+    background:rgba(0,212,184,.15); border:1px solid rgba(0,212,184,.3);
+    color:var(--teal); border-radius:8px; padding:.3rem .7rem;
+    font-size:.72rem; cursor:pointer; font-family:'Cairo',sans-serif;
+  }
+
+  /* ── INSTALL BANNER ── */
+  #install-banner {
+    position:fixed; bottom:0; left:0; right:0;
+    background:linear-gradient(135deg, #0d1526, #111d35);
+    border-top:1px solid var(--teal);
+    padding:1rem 1.2rem; z-index:500;
+    display:none; align-items:center; gap:1rem;
+    box-shadow:0 -8px 32px rgba(0,0,0,.5);
+  }
+  .install-icon { font-size:2rem; flex-shrink:0; }
+  .install-text { flex:1; }
+  .install-text strong { display:block; font-size:.9rem; color:var(--teal); }
+  .install-text span { font-size:.75rem; color:var(--text2); }
+  .install-btns { display:flex; gap:.5rem; flex-shrink:0; }
+  .btn-install {
+    background:var(--teal); color:#000; font-weight:700;
+    font-family:'Cairo',sans-serif; font-size:.8rem; border:none;
+    border-radius:8px; padding:.5rem .9rem; cursor:pointer;
+  }
+  .btn-dismiss {
+    background:transparent; border:1px solid var(--border);
+    color:var(--text2); font-family:'Cairo',sans-serif;
+    font-size:.8rem; border-radius:8px; padding:.5rem .9rem; cursor:pointer;
+  }
+
+  /* ── TOAST ── */
+  #toast {
+    position:fixed; top:1rem; left:50%; transform:translateX(-50%) translateY(-80px);
+    background:var(--teal); color:#000; font-weight:700;
+    padding:.7rem 1.4rem; border-radius:30px; font-size:.85rem;
+    z-index:9999; transition:transform .3s; pointer-events:none;
+    white-space:nowrap;
+  }
+  #toast.show { transform:translateX(-50%) translateY(0); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width:4px; height:4px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+  /* Admin only elements */
+  .admin-only { display:none; }
+  body.is-admin .admin-only { display:block; }
+  body.is-admin .admin-only-flex { display:flex; }
+
+  .empty-state { text-align:center; padding:2rem; color:var(--text2); font-size:.85rem; }
+  .empty-icon { font-size:2.5rem; margin-bottom:.5rem; }
+
+  @media(min-width:600px) {
+    .stats-grid { grid-template-columns: repeat(4, 1fr); }
+    .form-row { grid-template-columns: 1fr 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo">🏢 Third Line</div>
+  <div class="splash-sub">Sales Management System</div>
+  <div class="splash-bar"><div class="splash-fill"></div></div>
+</div>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-logo">Third Line</div>
+  <div class="login-tagline">نظام إدارة فريق المبيعات</div>
+  <div class="login-card">
+    <div class="login-title">🔐 تسجيل الدخول</div>
+    <div class="field">
+      <label>اختر اسمك</label>
+      <select id="login-user">
+        <option value="">— اختر —</option>
+        <option value="admin">المدير (Admin)</option>
+        <option value="hazem">Hazem</option>
+        <option value="dx">Dx</option>
+        <option value="ahmed">Ahmed</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>الرقم السري</label>
+      <input type="password" id="login-pass" placeholder="أدخل الرقم السري" maxlength="6">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">دخول</button>
+    <div class="login-err" id="login-err">❌ الرقم السري غلط</div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="header">
+    <div>
+      <div class="header-logo">Third Line</div>
+      <div class="header-user">مرحباً، <span id="hdr-name">—</span></div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">خروج</button>
+  </div>
+
+  <div class="nav-tabs" id="nav-tabs">
+    <div class="nav-tab active" onclick="showPage('dashboard',this)">🏠 الرئيسية</div>
+    <div class="nav-tab" onclick="showPage('third-line',this)">📋 Third Line</div>
+    <div class="nav-tab" onclick="showPage('self-win',this)">⚡ Self Win</div>
+    <div class="nav-tab" onclick="showPage('done',this)">✅ Done</div>
+    <div class="nav-tab" onclick="showPage('report',this)">📊 Report</div>
+    <div class="nav-tab admin-only" onclick="showPage('map',this)">🗺 الخريطة</div>
+    <div class="nav-tab admin-only" onclick="showPage('admin',this)">⚙️ الإدارة</div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="dash-greeting" id="dash-greeting">أهلاً!</div>
+      <div class="dash-date" id="dash-date"></div>
+
+      <div class="stats-grid">
+        <div class="stat-card teal">
+          <div class="stat-icon">📍</div>
+          <div class="stat-val teal" id="stat-visits">—</div>
+          <div class="stat-lbl">إجمالي الزيارات</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-icon">🤝</div>
+          <div class="stat-val red" id="stat-wins">—</div>
+          <div class="stat-lbl">التعاقدات</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-val gold" id="stat-leads">—</div>
+          <div class="stat-lbl">Leads</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon">🏪</div>
+          <div class="stat-val blue" id="stat-accounts">—</div>
+          <div class="stat-lbl">Accounts</div>
+        </div>
+      </div>
+
+      <div class="section-title">آخر الزيارات</div>
+      <div id="recent-visits"></div>
+    </div>
+
+    <!-- THIRD LINE -->
+    <div class="page" id="page-third-line">
+      <div class="table-toolbar">
+        <input class="search-box" placeholder="🔍 ابحث عن محل..." oninput="filterTable('tl',this.value)" id="search-tl">
+        <select class="filter-select" onchange="filterStatus('tl',this.value)">
+          <option value="">كل الحالات</option>
+          <option value="Hold">Hold</option>
+          <option value="Account">Account</option>
+          <option value="Lead">Lead</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table id="table-tl">
+          <thead>
+            <tr>
+              <th>ID</th><th>الشهر</th><th>التاريخ</th><th>المسؤول</th>
+              <th>المنطقة</th><th>المحل</th><th>التليفون</th><th>الحالة</th>
+              <th>آخر إجراء</th><th>الإجراء القادم</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-tl"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SELF WIN -->
+    <div class="page" id="page-self-win">
+      <div class="section-title">إضافة زيارة جديدة</div>
+      <div class="form-card" style="margin-bottom:1.2rem">
+        <div class="form-row">
+          <div class="form-field">
+            <label>المنطقة</label>
+            <select id="sw-area">
+              <option>Zayed</option><option>October</option><option>Pyramids Gardens</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>اسم المحل</label>
+            <input type="text" id="sw-store" placeholder="اسم المحل">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>تليفون المحل</label>
+            <input type="tel" id="sw-phone" placeholder="01xxxxxxxxx" dir="ltr">
+          </div>
+          <div class="form-field">
+            <label>اسم التواصل</label>
+            <input type="text" id="sw-contact" placeholder="اسم الشخص">
+          </div>
+        </div>
+        <div class="form-field">
+          <label>العنوان</label>
+          <input type="text" id="sw-address" placeholder="العنوان بالتفصيل">
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>الحالة</label>
+            <select id="sw-status">
+              <option>Lead</option><option>Account</option><option>Hold</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>الإجراء القادم</label>
+            <input type="date" id="sw-next">
+          </div>
+        </div>
+        <div class="form-field">
+          <label>ملاحظات</label>
+          <textarea id="sw-note" placeholder="أي ملاحظات إضافية..."></textarea>
+        </div>
+        <button class="btn-submit" onclick="addSelfWin()">
+          <span>➕</span> إضافة الزيارة
+        </button>
+        <div class="form-success" id="sw-success">✅ تم إضافة الزيارة بنجاح!</div>
+      </div>
+
+      <div class="section-title">زياراتي (Self Win)</div>
+      <div id="sw-list"></div>
+    </div>
+
+    <!-- DONE -->
+    <div class="page" id="page-done">
+      <div class="table-toolbar">
+        <input class="search-box" placeholder="🔍 ابحث..." oninput="filterTable('done',this.value)" id="search-done">
+        <select class="filter-select" onchange="filterMonth('done',this.value)" id="filter-month-done">
+          <option value="">كل الشهور</option>
+          <option>Apr</option><option>May</option><option>Jun</option>
+          <option>Jul</option><option>Aug</option><option>Sep</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table id="table-done">
+          <thead>
+            <tr>
+              <th>ID</th><th>الشهر</th><th>التاريخ</th><th>المسؤول</th>
+              <th>المنطقة</th><th>المحل</th><th>التليفون</th><th>الحالة</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-done"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REPORT -->
+    <div class="page" id="page-report">
+      <div class="report-header">
+        <div>
+          <div class="report-year">📊 تقرير 2026</div>
+          <div style="font-size:.75rem;color:var(--text2)">إجمالي أداء الفريق</div>
+        </div>
+        <select class="filter-select" onchange="renderReport(this.value)" id="report-emp-filter">
+          <option value="all">كل الفريق</option>
+          <option value="hazem">Hazem</option>
+          <option value="dx">Dx</option>
+          <option value="ahmed">Ahmed</option>
+        </select>
+      </div>
+      <div class="rep-table-wrap">
+        <table class="rep-table" id="rep-table"></table>
+      </div>
+      <div class="stats-grid" id="report-totals"></div>
+    </div>
+
+    <!-- MAP -->
+    <div class="page" id="page-map">
+      <div class="map-container">
+        <div class="map-placeholder">
+          <div class="map-icon">🗺️</div>
+          <div class="map-text">خريطة مواقع الفريق</div>
+          <div style="font-size:.75rem;color:var(--text2);margin-top:.3rem">سيتم ربطها بالموقع الحقيقي</div>
+        </div>
+      </div>
+      <div class="section-title">حالة الفريق الآن</div>
+      <div class="team-list" id="team-list"></div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="page" id="page-admin">
+      <div class="section-title">لوحة الإدارة</div>
+      <div class="admin-grid">
+        <div class="admin-card" onclick="refreshData()">
+          <div class="admin-card-icon">🔄</div>
+          <div class="admin-card-title">تحديث البيانات</div>
+          <div class="admin-card-sub">من Google Sheets</div>
+        </div>
+        <div class="admin-card" onclick="showToast('قريباً: تصدير التقرير')">
+          <div class="admin-card-icon">📥</div>
+          <div class="admin-card-title">تصدير البيانات</div>
+          <div class="admin-card-sub">Excel / PDF</div>
+        </div>
+        <div class="admin-card" onclick="showToast('قريباً: إدارة المناطق')">
+          <div class="admin-card-icon">🗺️</div>
+          <div class="admin-card-title">المناطق</div>
+          <div class="admin-card-sub">إضافة / تعديل</div>
+        </div>
+        <div class="admin-card" onclick="showToast('قريباً: إشعارات الفريق')">
+          <div class="admin-card-icon">🔔</div>
+          <div class="admin-card-title">الإشعارات</div>
+          <div class="admin-card-sub">إرسال للفريق</div>
+        </div>
+      </div>
+
+      <div class="section-title">الأرقام السرية</div>
+      <div class="pwd-list" id="pwd-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- INSTALL BANNER -->
+<div id="install-banner">
+  <div class="install-icon">📱</div>
+  <div class="install-text">
+    <strong>ثبّت التطبيق</strong>
+    <span>وصول سريع من الشاشة الرئيسية</span>
+  </div>
+  <div class="install-btns">
+    <button class="btn-install" onclick="installApp()">تثبيت</button>
+    <button class="btn-dismiss" onclick="dismissInstall()">لا شكراً</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2wsl0DpEdTuoZVBkg5-fURbjeEM5ezuX99JM7f6nAgsydr9J1_FxB7UAoJNZ29LUm/exec';
+
+// أرقام سرية — تقدر تغيرها من صفحة الإدارة وهتتحفظ في المتصفح
+const DEFAULT_USERS = {
+  admin: { name:'المدير', pass:'1234', role:'admin' },
+  hazem: { name:'Hazem',  pass:'1111', role:'sales' },
+  dx:    { name:'Dx',     pass:'2222', role:'sales' },
+  ahmed: { name:'Ahmed',  pass:'3333', role:'sales' },
+};
+
+// تحميل الأرقام السرية من localStorage لو في تعديلات محفوظة
+let USERS = JSON.parse(localStorage.getItem('tl_users') || 'null') || DEFAULT_USERS;
+
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+let currentUser = null;
+let deferredPrompt = null;
+let allData = [];
+let sheetLoaded = false;
+let selfWinNext = 1000;
+
+// ── GOOGLE SHEETS API ──────────────────────────────────────────────
+async function fetchFromSheet(action, extra = {}) {
+  const url = `${SCRIPT_URL}?action=${action}` +
+    (extra.sheet ? `&sheet=${encodeURIComponent(extra.sheet)}` : '');
+  try {
+    const res = await fetch(url);
+    const json = await res.json();
+    return json.success ? json.data : null;
+  } catch(e) {
+    console.error('Sheet fetch error:', e);
+    return null;
+  }
+}
+
+async function postToSheet(body) {
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+    const json = await res.json();
+    return json.success;
+  } catch(e) {
+    console.error('Sheet post error:', e);
+    return false;
+  }
+}
+
+// تحويل صف الشيت لـ object موحد للتطبيق
+function parseSheetRow(row, tab) {
+  const status = row['Status'] || row['status'] || 'Lead';
+  return {
+    id:         row['ID'] || row['id'] || '',
+    month:      row['Month'] || row['month'] || '',
+    date:       row['Date Of Task'] || row['date'] || '',
+    admin:      row['Current Admin'] || row['admin'] || '',
+    area:       row['Area'] || row['area'] || '',
+    store:      row['Store'] || row['store'] || '',
+    phone:      row['Store Phone'] || row['phone'] || '',
+    contact:    row['Contact Person'] || row['contact'] || '',
+    address:    row['Address'] || row['address'] || '',
+    note:       row['Note'] || row['note'] || '',
+    status:     status,
+    lastAction: row['last Action'] || row['Last Action'] || row['lastAction'] || '',
+    nextAction: row['Next Action'] || row['nextAction'] || '',
+    _rowIndex:  row['_rowIndex'] || '',
+    tab,
+  };
+}
+
+async function loadAllData() {
+  showLoading(true);
+  const data = await fetchFromSheet('getAllData');
+  if (!data) {
+    showLoading(false);
+    showToast('⚠️ تعذر الاتصال بالشيت');
+    return;
+  }
+  allData = [];
+  const tabMap = {
+    'Third Line': 'third-line',
+    'Self Win':   'self-win',
+    'Done':       'done',
+  };
+  Object.entries(tabMap).forEach(([sheetName, tab]) => {
+    const sheet = data[sheetName];
+    if (sheet && sheet.rows) {
+      sheet.rows.forEach(row => allData.push(parseSheetRow(row, tab)));
+    }
+  });
+
+  // Report data من الشيت
+  if (data['Report'] && data['Report'].rows) {
+    parseReportSheet(data['Report']);
+  }
+
+  selfWinNext = Math.max(...allData.map(d => parseInt(d.id)||0), 999) + 1;
+  sheetLoaded = true;
+  showLoading(false);
+  renderDashboard();
+  renderTable('tl');
+  renderSelfWin();
+  renderTable('done');
+  renderReport('all');
+  renderMap();
+}
+
+// تحليل شيت الـ Report
+let REPORT_DATA = {};
+function parseReportSheet(sheet) {
+  REPORT_DATA = {};
+  if (!sheet.rows) return;
+  sheet.rows.forEach(row => {
+    // بنفترض إن الشيت فيها: Description, Hazem-Visits, Hazem-Tested, إلخ
+    // أو بنبني من allData مباشرة
+  });
+  // بناء تقرير من allData
+  buildReportFromData();
+}
+
+function buildReportFromData() {
+  REPORT_DATA = {};
+  const empMap = {};
+  allData.forEach(d => {
+    const emp = (d.admin || '').toLowerCase().trim();
+    const month = (d.month || '').trim();
+    if (!emp || !month) return;
+    if (!empMap[emp]) empMap[emp] = {};
+    if (!empMap[emp][month]) empMap[emp][month] = {visits:0, tested:0, win:0, selfWin:0};
+    empMap[emp][month].visits++;
+    if (d.status === 'Account') empMap[emp][month].win++;
+    if (d.tab === 'self-win') empMap[emp][month].selfWin++;
+  });
+  REPORT_DATA = empMap;
+}
+
+function showLoading(on) {
+  let el = document.getElementById('loading-overlay');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'loading-overlay';
+    el.style.cssText = `position:fixed;inset:0;background:rgba(7,13,26,.85);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      z-index:800;font-size:.9rem;color:var(--teal);gap:.8rem;`;
+    el.innerHTML = `<div style="font-size:2rem">⏳</div><div>جاري تحميل البيانات...</div>`;
+    document.body.appendChild(el);
+  }
+  el.style.display = on ? 'flex' : 'none';
+}
+
+// ── PWA ───────────────────────────────────────────────────────────
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(() => {
+    if (currentUser) document.getElementById('install-banner').style.display = 'flex';
+  }, 3000);
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+  }
+  document.getElementById('install-banner').style.display = 'none';
+}
+function dismissInstall() {
+  document.getElementById('install-banner').style.display = 'none';
+}
+
+// ── SPLASH & INIT ─────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('splash').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('splash').style.display = 'none';
+      document.getElementById('login').style.display = 'flex';
+    }, 500);
+  }, 2000);
+
+  // Date
+  const now = new Date();
+  document.getElementById('dash-date').textContent =
+    now.toLocaleDateString('ar-EG', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+});
+
+// ── AUTH ──────────────────────────────────────────────────────────
+function doLogin() {
+  const uid = document.getElementById('login-user').value;
+  const pass = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-err');
+  if (!uid) { err.style.display='block'; err.textContent='❌ اختر اسمك أولاً'; return; }
+  const u = USERS[uid];
+  if (!u || u.pass !== pass) { err.style.display='block'; err.textContent='❌ الرقم السري غلط'; return; }
+  err.style.display = 'none';
+  currentUser = { id:uid, ...u };
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  if (currentUser.role === 'admin') document.body.classList.add('is-admin');
+  initApp();
+}
+
+function doLogout() {
+  currentUser = null;
+  document.body.classList.remove('is-admin');
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login').style.display = 'flex';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-user').value = '';
+  document.getElementById('install-banner').style.display = 'none';
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+function initApp() {
+  document.getElementById('hdr-name').textContent = currentUser.name;
+  document.getElementById('dash-greeting').textContent = `أهلاً، ${currentUser.name}! 👋`;
+  renderAdmin();
+  showPage('dashboard', document.querySelector('.nav-tab'));
+  loadAllData();
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────
+function renderDashboard() {
+  const myData = currentUser.role === 'admin'
+    ? allData
+    : allData.filter(d => d.admin.toLowerCase() === currentUser.id);
+
+  document.getElementById('stat-visits').textContent = myData.length;
+  document.getElementById('stat-wins').textContent = myData.filter(d=>d.status==='Account'&&d.tab==='done').length;
+  document.getElementById('stat-leads').textContent = myData.filter(d=>d.status==='Lead').length;
+  document.getElementById('stat-accounts').textContent = myData.filter(d=>d.status==='Account').length;
+
+  const recent = myData.slice(-5).reverse();
+  const el = document.getElementById('recent-visits');
+  if (!recent.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div>لا توجد زيارات بعد</div>'; return; }
+  el.innerHTML = recent.map(d => `
+    <div class="visit-card status-${d.status.toLowerCase()}">
+      <div class="vc-top">
+        <div class="vc-store">${d.store}</div>
+        <div class="vc-id">#${d.id}</div>
+      </div>
+      <div class="vc-area">📍 ${d.area} · ${d.admin}</div>
+      <div class="vc-bottom">
+        <div class="vc-phone">${d.phone||'—'}</div>
+        <div class="status-badge badge-${d.status.toLowerCase()}">${d.status}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── TABLES ────────────────────────────────────────────────────────
+function getTabData(tab) {
+  const src = tab === 'done' ? 'done'
+            : tab === 'tl'   ? 'third-line'
+                             : 'self-win';
+  let data = allData.filter(d => d.tab === src);
+  if (currentUser.role !== 'admin')
+    data = data.filter(d => d.admin.toLowerCase() === currentUser.id);
+  return data;
+}
+
+function renderTable(tab) {
+  const data = getTabData(tab);
+  const tbody = document.getElementById('tbody-'+tab);
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="10" class="empty-state">لا توجد بيانات</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(d => `
+    <tr>
+      <td>${d.id}</td>
+      <td>${d.month}</td>
+      <td style="white-space:nowrap;font-size:.72rem">${d.date}</td>
+      <td><span style="color:var(--teal);font-weight:700">${d.admin}</span></td>
+      <td>${d.area}</td>
+      <td class="td-store">${d.store}</td>
+      <td dir="ltr" style="font-size:.75rem">${d.phone||'—'}</td>
+      <td><span class="status-badge badge-${d.status.toLowerCase()}">${d.status}</span></td>
+      ${tab!=='done'?`<td style="font-size:.72rem;color:var(--text2)">${d.lastAction||'—'}</td><td style="font-size:.72rem;color:var(--gold)">${d.nextAction||'—'}</td>`:''}
+    </tr>
+  `).join('');
+}
+
+function filterTable(tab, q) {
+  const data = getTabData(tab).filter(d =>
+    d.store.includes(q) || d.area.includes(q) || d.admin.toLowerCase().includes(q.toLowerCase())
+  );
+  const tbody = document.getElementById('tbody-'+tab);
+  if (!data.length) { tbody.innerHTML = `<tr><td colspan="10" class="empty-state">لا نتائج</td></tr>`; return; }
+  tbody.innerHTML = data.map(d => `
+    <tr>
+      <td>${d.id}</td><td>${d.month}</td>
+      <td style="white-space:nowrap;font-size:.72rem">${d.date}</td>
+      <td style="color:var(--teal);font-weight:700">${d.admin}</td>
+      <td>${d.area}</td><td class="td-store">${d.store}</td>
+      <td dir="ltr" style="font-size:.75rem">${d.phone||'—'}</td>
+      <td><span class="status-badge badge-${d.status.toLowerCase()}">${d.status}</span></td>
+      ${tab!=='done'?`<td style="font-size:.72rem;color:var(--text2)">${d.lastAction||'—'}</td><td style="font-size:.72rem;color:var(--gold)">${d.nextAction||'—'}</td>`:''}
+    </tr>
+  `).join('');
+}
+
+function filterStatus(tab, s) {
+  const data = s ? getTabData(tab).filter(d=>d.status===s) : getTabData(tab);
+  const tbody = document.getElementById('tbody-'+tab);
+  tbody.innerHTML = data.map(d => `
+    <tr>
+      <td>${d.id}</td><td>${d.month}</td>
+      <td style="white-space:nowrap;font-size:.72rem">${d.date}</td>
+      <td style="color:var(--teal);font-weight:700">${d.admin}</td>
+      <td>${d.area}</td><td class="td-store">${d.store}</td>
+      <td dir="ltr" style="font-size:.75rem">${d.phone||'—'}</td>
+      <td><span class="status-badge badge-${d.status.toLowerCase()}">${d.status}</span></td>
+      <td style="font-size:.72rem;color:var(--text2)">${d.lastAction||'—'}</td>
+      <td style="font-size:.72rem;color:var(--gold)">${d.nextAction||'—'}</td>
+    </tr>
+  `).join('');
+}
+
+function filterMonth(tab, m) {
+  const data = m ? getTabData(tab).filter(d=>d.month===m) : getTabData(tab);
+  const tbody = document.getElementById('tbody-done');
+  tbody.innerHTML = data.map(d => `
+    <tr>
+      <td>${d.id}</td><td>${d.month}</td>
+      <td style="white-space:nowrap;font-size:.72rem">${d.date}</td>
+      <td style="color:var(--teal);font-weight:700">${d.admin}</td>
+      <td>${d.area}</td><td class="td-store">${d.store}</td>
+      <td dir="ltr" style="font-size:.75rem">${d.phone||'—'}</td>
+      <td><span class="status-badge badge-${d.status.toLowerCase()}">${d.status}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ── SELF WIN FORM ─────────────────────────────────────────────────
+async function addSelfWin() {
+  const store = document.getElementById('sw-store').value.trim();
+  const phone = document.getElementById('sw-phone').value.trim();
+  const area  = document.getElementById('sw-area').value;
+  const contact = document.getElementById('sw-contact').value.trim();
+  const address = document.getElementById('sw-address').value.trim();
+  const status = document.getElementById('sw-status').value;
+  const next = document.getElementById('sw-next').value;
+  const note = document.getElementById('sw-note').value.trim();
+  if (!store) { showToast('أدخل اسم المحل أولاً'); return; }
+
+  const now = new Date();
+  const newId = selfWinNext++;
+  const dateStr = now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  const monthStr = MONTHS[now.getMonth()];
+
+  const rowData = {
+    'ID': newId,
+    'Month': monthStr,
+    'Date Of Task': dateStr,
+    'Current Admin': currentUser.name,
+    'Area': area,
+    'Store': store,
+    'Store Phone': phone,
+    'Contact Person': contact,
+    'Address': address,
+    'Note': note,
+    'Status': status,
+    'last Action': dateStr,
+    'Next Action': next,
+  };
+
+  // أضفه محلياً فوراً
+  const entry = {
+    id: newId, month: monthStr, date: dateStr, admin: currentUser.name,
+    area, store, phone, contact, address, note, status,
+    lastAction: dateStr, nextAction: next, tab: 'self-win'
+  };
+  allData.push(entry);
+
+  // امسح الفورم
+  ['sw-store','sw-phone','sw-contact','sw-address','sw-note'].forEach(id => document.getElementById(id).value='');
+  const succ = document.getElementById('sw-success');
+  succ.style.display='block';
+  setTimeout(()=>succ.style.display='none', 3000);
+  renderSelfWin();
+  renderDashboard();
+  buildReportFromData();
+
+  // ارفعه للشيت في الخلفية
+  showToast('⏳ جاري الحفظ في الشيت...');
+  const ok = await postToSheet({ action:'addRow', sheet:'Self Win', row: rowData });
+  showToast(ok ? '✅ تم الحفظ في الشيت!' : '⚠️ حُفظ محلياً فقط');
+}
+
+function renderSelfWin() {
+  const data = allData.filter(d => d.tab==='self-win' &&
+    (currentUser.role==='admin' || d.admin.toLowerCase()===currentUser.id));
+  const el = document.getElementById('sw-list');
+  if (!data.length) { el.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div>لا توجد إضافات بعد</div>'; return; }
+  el.innerHTML = data.map(d => `
+    <div class="visit-card status-${d.status.toLowerCase()}">
+      <div class="vc-top">
+        <div class="vc-store">${d.store}</div>
+        <div class="vc-id">#${d.id}</div>
+      </div>
+      <div class="vc-area">📍 ${d.area} · ${d.date}</div>
+      <div class="vc-bottom">
+        <div class="vc-phone">${d.phone||'—'}</div>
+        <div class="status-badge badge-${d.status.toLowerCase()}">${d.status}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── REPORT ────────────────────────────────────────────────────────
+function renderReport(empFilter) {
+  buildReportFromData();
+  const allEmps = Object.keys(REPORT_DATA).length
+    ? Object.keys(REPORT_DATA)
+    : ['hazem','dx','ahmed'];
+  const employees = empFilter === 'all' ? allEmps : [empFilter.toLowerCase()];
+
+  // تحديث فلتر الموظفين
+  const sel = document.getElementById('report-emp-filter');
+  if (sel && empFilter === 'all') {
+    const existing = new Set(Array.from(sel.options).map(o=>o.value));
+    allEmps.forEach(e => {
+      if (!existing.has(e)) {
+        const opt = document.createElement('option');
+        opt.value = e; opt.textContent = e.charAt(0).toUpperCase()+e.slice(1);
+        sel.appendChild(opt);
+      }
+    });
+  }
+
+  const empNames = {};
+  employees.forEach(e => { empNames[e] = e.charAt(0).toUpperCase()+e.slice(1); });
+
+  let html = '<thead><tr><th class="emp-head">الشهر</th>';
+  employees.forEach(e => {
+    html += `<th colspan="4" style="background:var(--teal2)">${empNames[e]}</th>`;
+  });
+  html += '</tr><tr><th class="emp-head"></th>';
+  employees.forEach(() => {
+    html += '<th>زيارات</th><th>Tested</th><th>Win</th><th>Self Win</th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  let totals = {};
+  employees.forEach(e => { totals[e] = {visits:0,tested:0,win:0,selfWin:0}; });
+
+  MONTHS.forEach(m => {
+    let rowData = employees.map(e => REPORT_DATA[e]?.[m] || {visits:0,tested:0,win:0,selfWin:0});
+    const hasData = rowData.some(r => r.visits>0||r.tested>0||r.win>0||r.selfWin>0);
+    if (!hasData) return;
+    html += `<tr><td>${m}</td>`;
+    employees.forEach((e,i) => {
+      const r = rowData[i];
+      totals[e].visits+=r.visits; totals[e].tested+=r.tested;
+      totals[e].win+=r.win; totals[e].selfWin+=r.selfWin;
+      html += `<td>${r.visits||''}</td><td>${r.tested||''}</td><td style="color:var(--green);font-weight:700">${r.win||''}</td><td>${r.selfWin||''}</td>`;
+    });
+    html += '</tr>';
+  });
+
+  html += '<tr class="total-row"><td>الإجمالي</td>';
+  employees.forEach(e => {
+    html += `<td>${totals[e].visits}</td><td>${totals[e].tested}</td><td>${totals[e].win}</td><td>${totals[e].selfWin}</td>`;
+  });
+  html += '</tr></tbody>';
+  document.getElementById('rep-table').innerHTML = html;
+
+  const el = document.getElementById('report-totals');
+  const allVisits = employees.reduce((s,e)=>s+totals[e].visits,0);
+  const allWins   = employees.reduce((s,e)=>s+totals[e].win,0);
+  el.innerHTML = `
+    <div class="stat-card teal">
+      <div class="stat-icon">📍</div>
+      <div class="stat-val teal">${allVisits}</div>
+      <div class="stat-lbl">إجمالي الزيارات</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-icon">🏆</div>
+      <div class="stat-val red">${allWins}</div>
+      <div class="stat-lbl">إجمالي الـ Win</div>
+    </div>
+  `;
+}
+
+// ── MAP ───────────────────────────────────────────────────────────
+function renderMap() {
+  const team = [
+    {name:'Hazem', area:'Zayed', visits:62, status:'active'},
+    {name:'Dx',    area:'October', visits:0, status:'idle'},
+    {name:'Ahmed', area:'—', visits:0, status:'idle'},
+  ];
+  document.getElementById('team-list').innerHTML = team.map(t=>`
+    <div class="team-item">
+      <div>
+        <div class="team-name">👤 ${t.name}</div>
+        <div class="team-visits">📍 ${t.area} · ${t.visits} زيارة</div>
+      </div>
+      <span class="team-status ${t.status==='active'?'ts-active':'ts-idle'}">
+        ${t.status==='active'?'🟢 نشط':'⚪ غير نشط'}
+      </span>
+    </div>
+  `).join('');
+}
+
+// ── ADMIN ─────────────────────────────────────────────────────────
+function renderAdmin() {
+  document.getElementById('pwd-list').innerHTML = Object.entries(USERS).map(([id,u])=>`
+    <div class="pwd-item">
+      <div>
+        <div class="pwd-name">${u.name}</div>
+        <div class="pwd-role">${u.role==='admin'?'🔴 مدير':'🔵 موظف'}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <div class="pwd-code">${u.pass}</div>
+        <button class="btn-sm" onclick="changePwd('${id}')">تغيير</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function changePwd(uid) {
+  const np = prompt(`الرقم السري الجديد لـ ${USERS[uid].name}:`);
+  if (np && np.length >= 4) {
+    USERS[uid].pass = np;
+    localStorage.setItem('tl_users', JSON.stringify(USERS));
+    renderAdmin();
+    showToast('✅ تم تغيير الرقم السري وحفظه');
+  } else if (np) {
+    showToast('❌ يجب أن يكون 4 أرقام على الأقل');
+  }
+}
+
+// زر تحديث البيانات من الشيت
+function refreshData() {
+  showToast('🔄 جاري التحديث...');
+  loadAllData();
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── SERVICE WORKER ────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
